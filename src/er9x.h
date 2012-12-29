@@ -208,6 +208,8 @@ extern uint8_t convert_mode_helper(uint8_t x) ;
 #define AIL_STICK       ((g_eeGeneral.stickMode&2) ? 0 : 3)
 #define RUD_STICK       ((g_eeGeneral.stickMode&2) ? 3 : 0)
 
+
+
 enum EnumKeys {
     KEY_MENU ,
     KEY_EXIT ,
@@ -645,6 +647,7 @@ extern inline uint16_t get_tmr10ms()
 //uint8_t checkSubGen(uint8_t event,uint8_t num, uint8_t sub, uint8_t mode);
 
 void menuProcLimits(uint8_t event);
+void menuProcReverse(uint8_t event);
 void menuProcMixOne(uint8_t event);
 void menuProcMix(uint8_t event);
 void menuProcCurve(uint8_t event);

@@ -266,7 +266,7 @@ void DO_SQUARE(uint8_t x, uint8_t y, uint8_t w)
     lcd_vline(x+w/2,y-w/2,w);
     lcd_hline(x-w/2,y-w/2,w);
 }
-#define DO_CROSS(xx,yy,ww)          \
+#define DO_CROSS(xx,yy,ww)     \
     lcd_vline(xx,yy-ww/2,ww);  \
     lcd_hline(xx-ww/2,yy,ww);  \
 
@@ -334,6 +334,7 @@ enum EnumTabModel {
     e_ExpoAll,
     e_Mix,
     e_Limits,
+	e_Reverse,
     e_Curve,
     e_Switches,
     e_SafetySwitches,
@@ -355,6 +356,7 @@ const MenuFuncP_PROGMEM APM menuTabModel[] = {
     menuProcExpoAll,
     menuProcMix,
     menuProcLimits,
+	menuProcReverse,  ///***
     menuProcCurve,
     menuProcSwitches,
     menuProcSafetySwitches,
@@ -370,7 +372,7 @@ const MenuFuncP_PROGMEM APM menuTabModel[] = {
 enum EnumTabDiag {
     e_Setup,
     e_Trainer,
-    e_Vers,
+ //   e_Vers,			//***
     e_Keys,
     e_Ana,
     e_Calib
@@ -379,7 +381,7 @@ enum EnumTabDiag {
 const MenuFuncP_PROGMEM APM menuTabDiag[] = {
     menuProcSetup,
     menuProcTrainer,
-    menuProcDiagVers,
+//    menuProcDiagVers,			//***
     menuProcDiagKeys,
     menuProcDiagAna,
     menuProcDiagCalib
@@ -399,7 +401,9 @@ void menu_lcd_onoff( uint8_t x,uint8_t y, uint8_t value, uint8_t mode )
 
 void menu_lcd_HYPHINV( uint8_t x,uint8_t y, uint8_t value, uint8_t mode )
 {
-    lcd_putsAttIdx( x, y, PSTR("\003---INV"),value,mode ? INVERS:0) ;
+  //  lcd_putsAttIdx( x, y, PSTR("\003---INV"),value,mode ? INVERS:0) ;
+	lcd_putsAttIdx( x, y, PSTR("\003NORREV"),value,mode ? INVERS:0) ;
+  
 }
 
 void MState2::check_simple(uint8_t event, uint8_t curr, const MenuFuncP *menuTab, uint8_t menuTabSize, uint8_t maxrow)
@@ -460,7 +464,7 @@ void MState2::check(uint8_t event, uint8_t curr, const MenuFuncP *menuTab, uint8
             if(scrollLR && !s_editMode)
             {
                 int8_t cc = curr - scrollLR;
-                if(cc<1) cc = 0;
+                if(cc<1) cc = 0;				
                 if(cc>(menuTabSize-1)) cc = menuTabSize-1;
 
                 if(cc!=curr)
@@ -522,7 +526,7 @@ void MState2::check(uint8_t event, uint8_t curr, const MenuFuncP *menuTab, uint8
 
         if(m_posVert>0 && scrollLR)
         {
-            int8_t cc = m_posHorz - scrollLR;
+            int8_t cc = m_posHorz - scrollLR;			
             if(cc<1) cc = 0;
             if(cc>=MAXCOL(m_posVert)) cc = MAXCOL(m_posVert);
             m_posHorz = cc;
@@ -633,6 +637,8 @@ void doMainScreenGrphics()
         {
             len = ((calibratedStick[y]+RESX)/((RESX*2)/BAR_HEIGHT))+1 ;  // calculate once per loop
             V_BAR(SCREEN_WIDTH/2+x,SCREEN_HEIGHT-8, len )
+			
+		  
         }
     }
 }
@@ -811,22 +817,75 @@ void setStickCenter() // copy state of 3 primary to subtrim
 
     // For this operation, keep using the 'MASTER' trims
     for(uint8_t i=0; i<4; i++)
-        if(!IS_THROTTLE(i)) g_model.trim[i] = 0;// set trims to zero.
+       if(!IS_THROTTLE(i)) g_model.trim[i] = 0;// set trims to zero.
+	
     STORE_MODELVARS_TRIM;
     audioDefevent(AU_WARNING2);
 }
 
+
+void menuProcReverse(uint8_t event)
+{
+    MENU("REVERSE", menuTabModel, e_Reverse, NUM_CHNOUT+1, {0, 2/*repeated*/});
+	
+	uint8_t y = 0;
+	uint8_t k = 0;
+	int8_t  sub    = mstate2.m_posVert - 1;
+//	uint8_t subSub = mstate2.m_posHorz;
+    uint8_t t_pgOfs ;
+
+	t_pgOfs = evalOffset(sub, 6);
+	
+	//  lcd_puts_P( 0*FW, 1*FH,PSTR("ch    sw     val"));
+for(uint8_t i=0; i<7; i++){
+    y=(i+1)*FH;
+    k=i+t_pgOfs;
+    if(k==NUM_CHNOUT) break;
+  
+    LimitData *ld = limitaddress(k) ;
+	putsChn(0,y,k+1,0);
+
+		uint8_t attr = ((sub==k) ? (s_editMode ? BLINK : INVERS) : 0);
+		uint8_t active = (attr && (s_editMode || p1valdiff)) ;
+		
+		
+	
+        
+          
+          menu_lcd_HYPHINV( 8*FW, y, ld->revert, attr ) ;
+
+            if(active) {
+                CHECK_INCDEC_H_MODELVAR(event, ld->revert, 0, 1);
+            }
+		
+	
+    }
+	
+	/*if(k==NUM_CHNOUT){
+    //last line available - add the "copy trim menu" line
+    uint8_t attr = (sub==NUM_CHNOUT) ? INVERS : 0;
+    lcd_putsAtt(  3*FW,y,PSTR("COPY TRIM [MENU]"),s_noHi ? 0 : attr);
+    if(attr && event==EVT_KEY_LONG(KEY_MENU)) {
+        s_noHi = NO_HI_LEN;
+        killEvents(event);
+        setStickCenter(); //if highlighted and menu pressed - copy trims
+    }
+	}*/
+
+}
+
 void menuProcLimits(uint8_t event)
 {
-    MENU("LIMITS", menuTabModel, e_Limits, NUM_CHNOUT+2, {0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0});
-
+  //  MENU("LIMITS", menuTabModel, e_Limits, NUM_CHNOUT+2, {0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0});
+	MENU("LIMITS", menuTabModel, e_Limits, NUM_CHNOUT+2, {0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0}); // horizon 2 col selection only 
+	
 static bool swVal[NUM_CHNOUT];
 
 uint8_t y = 0;
 uint8_t k = 0;
 int8_t  sub    = mstate2.m_posVert - 1;
 uint8_t subSub = mstate2.m_posHorz;
-    uint8_t t_pgOfs ;
+uint8_t t_pgOfs ;
 
 t_pgOfs = evalOffset(sub, 6);
 
@@ -855,24 +914,25 @@ for(uint8_t i=0; i<7; i++){
     int16_t v = (ld->revert) ? -ld->offset : ld->offset;
     if((g_chans512[k] - v) >  50) swVal[k] = (true==ld->revert);// Switch to raw inputs?  - remove trim!
     if((g_chans512[k] - v) < -50) swVal[k] = (false==ld->revert);
-    putsChn(0,y,k+1,0);
+    putsChn(0,y,k+1,0);		// show ch1 to ch16
     lcd_putcAtt(12*FW+FW/2, y, (swVal[k] ? 127 : 126),0); //'<' : '>'
-    
+   
     int8_t limit = (g_model.extendedLimits ? 125 : 100);
-		for(uint8_t j=0; j<4;j++)
-		{
-        uint8_t attr = ((sub==k && subSub==j) ? (s_editMode ? BLINK : INVERS) : 0);
-				uint8_t active = (attr && (s_editMode || p1valdiff)) ;
+		//for(uint8_t j=0; j<4;j++)
+		for(uint8_t j=0; j<3;j++)
+		{			
+			uint8_t attr = ((sub==k && subSub==j) ? (s_editMode ? BLINK: INVERS) : 0);			
+			uint8_t active = (attr && (s_editMode || p1valdiff)) ;
         switch(j)
         {
         case 0:
-            lcd_outdezAtt(  8*FW, y,  ld->offset, attr|PREC1);
+            lcd_outdezAtt(8*FW, y,  ld->offset, attr|PREC1);
             if(active) {
                 ld->offset = checkIncDec16(event, ld->offset, -1000, 1000, EE_MODEL);
             }
             break;
         case 1:
-            lcd_outdezAtt(  12*FW, y, (int8_t)(ld->min-100),   attr);
+            lcd_outdezAtt(12*FW, y, (int8_t)(ld->min-100),   attr);
             if(active) {
                 ld->min -=  100;
                 CHECK_INCDEC_H_MODELVAR( event, ld->min, -limit,25);
@@ -887,17 +947,17 @@ for(uint8_t i=0; i<7; i++){
                 ld->max -=  100;
             }
             break;
-        case 3:
-						menu_lcd_HYPHINV( 18*FW, y, ld->revert, attr ) ;
+    /*    case 3:
+			menu_lcd_HYPHINV( 18*FW, y, ld->revert, attr ) ;
 //            lcd_putsnAtt(   18*FW, y, PSTR("---INV")+ld->revert*3,3,attr);
             if(active) {
                 CHECK_INCDEC_H_MODELVAR(event, ld->revert, 0, 1);
             }
-            break;
+            break;*/
         }
     }
 }
-if(k==NUM_CHNOUT){
+	if(k==NUM_CHNOUT){
     //last line available - add the "copy trim menu" line
     uint8_t attr = (sub==NUM_CHNOUT) ? INVERS : 0;
     lcd_putsAtt(  3*FW,y,PSTR("COPY TRIM [MENU]"),s_noHi ? 0 : attr);
@@ -906,7 +966,7 @@ if(k==NUM_CHNOUT){
         killEvents(event);
         setStickCenter(); //if highlighted and menu pressed - copy trims
     }
-}
+	}
 }
 
 #define PARAM_OFS   17*FW
@@ -1131,7 +1191,7 @@ void menuProcTemplates(uint8_t event)  //Issue 73
         if(sub==NUM_TEMPLATES+1)
             clearMixes();
         else if((sub>=0) && (sub<(int8_t)NUM_TEMPLATES))
-            applyTemplate(sub);
+            applyTemplate(sub, g_eeGeneral.stickMode);				
         audioDefevent(AU_WARNING2);
         break;
     }
@@ -2732,7 +2792,7 @@ void menuProcDiagKeys(uint8_t event)
         lcd_putcAtt(x+FW*6,  y, tp+'0',tp ? INVERS : 0);
     }
 }
-
+/*
 void menuProcDiagVers(uint8_t event)
 {
     SIMPLE_MENU("VERSION", menuTabDiag, e_Vers, 1);
@@ -2742,7 +2802,7 @@ void menuProcDiagVers(uint8_t event)
     lcd_puts_Pleft( 4*FH,stamp2 );
     lcd_puts_Pleft( 5*FH,stamp3 );
     lcd_puts_Pleft( 6*FH,stamp5 );
-}
+}*/
 
 // From Bertrand, allow trainer inputs without using mixers.
 // Raw trianer inputs replace raw sticks.
@@ -3091,7 +3151,7 @@ if(g_eeGeneral.speakerMode == 1 || g_eeGeneral.speakerMode == 2 ){
         for(uint8_t i=0;i<8;i++) lcd_putsnAtt((11+i)*FW, y, Str_TRE012AG+i,1,  ((g_eeGeneral.switchWarningStates & (1<<i)) ? INVERS : 0 ) );
 
         if(sub==subN){
-            mstate2.m_posHorz -= scrollLR;
+            mstate2.m_posHorz -= scrollLR;			
             if((int8_t(mstate2.m_posHorz))<0) mstate2.m_posHorz = 0;
             if((int8_t(mstate2.m_posHorz))>(GENERAL_OWNER_NAME_LEN-1)) mstate2.m_posHorz = GENERAL_OWNER_NAME_LEN-1;
             scrollLR = 0;
@@ -3837,7 +3897,7 @@ void menuProc0(uint8_t event)
 //            static uint8_t vert[4] = {0,1,1,0};
             uint8_t xm,ym;
             xm=x[i];
-            int8_t val = max((int8_t)-(TL+1),min((int8_t)(TL+1),(int8_t)(*TrimPtr[i]/4)));
+            int8_t val = max((int8_t)-(TL+1),min((int8_t)(TL+1),(int8_t)(*TrimPtr[i]/4)));			
 //            if(vert[i]){
             if( (i == 1) || ( i == 2 )){
                 ym=31;
@@ -3855,7 +3915,8 @@ void menuProc0(uint8_t event)
                 lcd_hline(xm-1, ym+1,  3);
                 xm += val;
             }
-            DO_SQUARE(xm,ym,7) ;
+            DO_SQUARE(xm,ym,7);
+		  
         }
     }
     else {
@@ -3868,7 +3929,8 @@ void menuProc0(uint8_t event)
         }
     }
 
-    if(view<e_inputs1) {
+   // if(view<e_inputs1) {    here
+	if(view==e_outputBars){			// 7 sep 2012
         for(uint8_t i=0; i<8; i++)
         {
             uint8_t x0,y0;
@@ -3876,13 +3938,13 @@ void menuProc0(uint8_t event)
             //val += g_model.limitData[i].revert ? g_model.limitData[i].offset : -g_model.limitData[i].offset;
             switch(view)
             {
-            case e_outputValues:
+         /*  case e_outputValues:    //stick number value   7 sep 2012
                 x0 = (i%4*9+3)*FW/2;
                 y0 = i/4*FH+40;
                 // *1000/1024 = x - x/8 + x/32
 #define GPERC(x)  (x - x/32 + x/128)
                 lcd_outdezAtt( x0+4*FW , y0, GPERC(val),PREC1 );
-                break;
+                break;*/
             case e_outputBars:
 #define WBAR2 (50/2)
                 x0       = i<4 ? 128/4+2 : 128*3/4-2;

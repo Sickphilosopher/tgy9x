@@ -47,9 +47,12 @@ ISR(TIMER1_COMPA_vect) //2MHz pulse generation
     //        ;
     uint16_t dt=TCNT1;//-OCR1A;
 
+
+
+
     if(pulsePol)
     {
-        PORTB |=  (1<<OUT_B_PPM);
+        PORTB |=  (1<<OUT_B_PPM);		
         pulsePol = 0;
     }else{
         PORTB &= ~(1<<OUT_B_PPM);
@@ -238,7 +241,7 @@ void setupPulsesPPM() // changed 10/05/2010 by dino Issue 128
     //each pulse is 0.7..1.7ms long with a 0.3ms stop tail
     //The pulse ISR is 2mhz that's why everything is multiplied by 2
     uint16_t *ptr ;
-    ptr = pulses2MHz.pword ;
+    ptr = pulses2MHz.pword;
     uint8_t p=8+g_model.ppmNCH*2; //Channels *2
     uint16_t q=(g_model.ppmDelay*50+300)*2; //Stoplen *2
     uint16_t rest=22500u*2-q; //Minimum Framelen=22.5 ms

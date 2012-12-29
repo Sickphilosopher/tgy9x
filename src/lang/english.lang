@@ -162,7 +162,7 @@
 
 // templates.h
 // ***********
-#define S_            "Simple 4-CH"
+#define S_            "Simple 6-CH"
 #define S_            "T-Cut"
 #define S_            "V-Tail"
 #define S_            "Elevon\\Delta"

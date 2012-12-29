@@ -42,24 +42,25 @@
 
 #ifndef NO_TEMPLATES
 
-const static prog_char APM string_1[] = "Simple 4-CH";
+const static prog_char APM string_1[] = "Simple 6-CH";
 const static prog_char APM string_2[] = "T-Cut";
-const static prog_char APM string_3[] = "Sticky T-Cut";
-const static prog_char APM string_4[] = "V-Tail";
-const static prog_char APM string_5[] = "Elevon\\Delta";
-const static prog_char APM string_6[] = "Heli Setup";
-const static prog_char APM string_7[] = "Gyro Setup";
-const static prog_char APM string_8[] = "Servo Test";
+//const static prog_char APM string_3[] = "Sticky T-Cut";   // remove 6/sep/2012
+const static prog_char APM string_3[] = "V-Tail";
+const static prog_char APM string_4[] = "Elevon\\Delta";
+const static prog_char APM string_5[] = "Heli Setup";
+const static prog_char APM string_6[] = "Gyro Setup";
+const static prog_char APM string_7[] = "Servo Test";
 
-const prog_char *const n_Templates[8] PROGMEM = {
+//const prog_char *const n_Templates[8] PROGMEM = {			// reduce to 7 6/sep/2012
+const prog_char *const n_Templates[7] PROGMEM = {
     string_1,
     string_2,
     string_3,
     string_4,
     string_5,
     string_6,
-    string_7,
-    string_8
+    string_7
+  //  string_8
 };
 
 #endif
@@ -113,7 +114,7 @@ NOINLINE uint8_t convert_mode_helper(uint8_t x)
 }
 
 
-void applyTemplate(uint8_t idx)
+void applyTemplate(uint8_t idx, uint8_t stick)
 {
 #ifndef NO_TEMPLATES
     int8_t heli_ar1[] = {-100, -20, 30, 70, 90};
@@ -131,58 +132,97 @@ void applyTemplate(uint8_t idx)
     for(uint8_t i=1; i<=4; i++) //generate inverse array
         for(uint8_t j=1; j<=4; j++) if(CC(i)==j) icc[j-1]=i;
 
-
     uint8_t j = 0;
 
-    //Simple 4-Ch
+    //Simple 6-Ch
     if(idx==j++) 
     {
-        clearMixes();
-        md=setDest(ICC(STK_RUD));  md->srcRaw=CM(STK_RUD);  md->weight=100;
-        md=setDest(ICC(STK_ELE));  md->srcRaw=CM(STK_ELE);  md->weight=100;
-        md=setDest(ICC(STK_THR));  md->srcRaw=CM(STK_THR);  md->weight=100;
-        md=setDest(ICC(STK_AIL));  md->srcRaw=CM(STK_AIL);  md->weight=100;
+        clearMixes();		
+			md=setDest(1);	 md->srcRaw=CM(STK_THR);  md->weight=100;
+			md=setDest(2);	 md->srcRaw=CM(STK_AIL);  md->weight=100;    
+			md=setDest(3);   md->srcRaw=CM(STK_ELE);  md->weight=100;
+			md=setDest(4);	md->srcRaw=CM(STK_RUD);  md->weight=100;
+			md=setDest(5);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_GEA;
+			md=setDest(6);  md->srcRaw=MIX_MAX; md->weight=100; md->swtch=DSW_ID1;md->mltpx=MLTPX_REP;	
+			md=setDest(6);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_ID2;
+			
+		     
     }
 #ifndef NO_TEMPLATES
 
-    //T-Cut
+    //T-Cut   mean disable throttle to zero 
     if(idx==j++)
     {
-        md=setDest(ICC(STK_THR));  md->srcRaw=MIX_MAX;  md->weight=-100;  md->swtch=DSW_THR;  md->mltpx=MLTPX_REP;
+		clearMixes();
+	
+			md=setDest(1);	 md->srcRaw=CM(STK_THR);  md->weight=100;
+			md=setDest(1);  md->srcRaw=MIX_MAX;  md->weight=-100;  md->swtch=DSW_THR;  md->mltpx=MLTPX_REP;
+			md=setDest(2);	 md->srcRaw=CM(STK_AIL);  md->weight=100;    
+			md=setDest(3);   md->srcRaw=CM(STK_ELE);  md->weight=100;			
+			md=setDest(4);	md->srcRaw=CM(STK_RUD);  md->weight=100;  
+			md=setDest(5);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_GEA;
+			md=setDest(6);  md->srcRaw=MIX_MAX; md->weight=100; md->swtch=DSW_ID1;md->mltpx=MLTPX_REP;	
+			md=setDest(6);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_ID2;			     
+		
     }
 
     //sticky t-cut
-    if(idx==j++)
+   /* if(idx==j++)
     {
-        md=setDest(ICC(STK_THR));  md->srcRaw=MIX_MAX;  md->weight=-100;  md->swtch=DSW_SWC;  md->mltpx=MLTPX_REP;
-        md=setDest(14);            md->srcRaw=CH(14);   md->weight= 100;
+		clearMixes();		
+        
+		md=setDest(1);	 md->srcRaw=CM(STK_THR);  md->weight=100;
+		md=setDest(1);  md->srcRaw=MIX_MAX;  md->weight=-100;  md->swtch=DSW_SWC;  md->mltpx=MLTPX_REP;
+		md=setDest(2);	 md->srcRaw=CM(STK_AIL);  md->weight=100;    
+		md=setDest(3);  md->srcRaw=CM(STK_ELE);  md->weight=100;		
+		md=setDest(4);	 md->srcRaw=CM(STK_RUD);  md->weight=100;  
+		
+		
+		md=setDest(5);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_GEA;
+		md=setDest(6);  md->srcRaw=MIX_MAX; md->weight=100; md->swtch=DSW_ID1;md->mltpx=MLTPX_REP;	
+		md=setDest(6);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_ID2;
+		md=setDest(14);            md->srcRaw=CH(14);   md->weight= 100;
         md=setDest(14);            md->srcRaw=MIX_MAX;  md->weight=-100;  md->swtch=DSW_SWB;  md->mltpx=MLTPX_REP;
         md=setDest(14);            md->srcRaw=MIX_MAX;  md->weight= 100;  md->swtch=DSW_THR;  md->mltpx=MLTPX_REP;
 
         setSwitch(0xB,CS_VNEG, CM(STK_THR), -99);
         setSwitch(0xC,CS_VPOS, CH(14), 0);
-    }
+    }*/
 
-    //V-Tail
+    //V-Tail   rub same direction, ele reverse 
     if(idx==j++) 
     {
         clearMixes();
-        md=setDest(ICC(STK_RUD));  md->srcRaw=CM(STK_RUD);  md->weight= 100;
-        md=setDest(ICC(STK_RUD));  md->srcRaw=CM(STK_ELE);  md->weight=-100;
-        md=setDest(ICC(STK_ELE));  md->srcRaw=CM(STK_RUD);  md->weight= 100;
-        md=setDest(ICC(STK_ELE));  md->srcRaw=CM(STK_ELE);  md->weight= 100;
+			
+		md=setDest(1);	 md->srcRaw=CM(STK_THR);  md->weight=100;	
+		md=setDest(2);	 md->srcRaw=CM(STK_AIL);  md->weight=100;
+		md=setDest(3);  md->srcRaw=CM(STK_RUD);  md->weight= 100;
+		md=setDest(3);  md->srcRaw=CM(STK_ELE);  md->weight=-100;
+		md=setDest(4);  md->srcRaw=CM(STK_RUD);  md->weight= 100;
+		md=setDest(4);  md->srcRaw=CM(STK_ELE);  md->weight= 100;
+						
+		md=setDest(5);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_GEA;
+		md=setDest(6);  md->srcRaw=MIX_MAX; md->weight=100; md->swtch=DSW_ID1;md->mltpx=MLTPX_REP;	
+		md=setDest(6);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_ID2;		
     }
 
-    //Elevon\\Delta
+    //Elevon\\Delta    elevrator same, aileron reverse
     if(idx==j++)
     {
-        clearMixes();
-        md=setDest(ICC(STK_ELE));  md->srcRaw=CM(STK_ELE);  md->weight= 100;
-        md=setDest(ICC(STK_ELE));  md->srcRaw=CM(STK_AIL);  md->weight= 100;
-        md=setDest(ICC(STK_AIL));  md->srcRaw=CM(STK_ELE);  md->weight= 100;
-        md=setDest(ICC(STK_AIL));  md->srcRaw=CM(STK_AIL);  md->weight=-100;
+        clearMixes();		
+		
+		md=setDest(1);	 md->srcRaw=CM(STK_THR);  md->weight=100;	
+		md=setDest(2);	 md->srcRaw=CM(STK_ELE);  md->weight= 100;
+		md=setDest(2);  md->srcRaw=CM(STK_AIL);  md->weight= 100;
+		md=setDest(3);  md->srcRaw=CM(STK_ELE);  md->weight= 100;
+		md=setDest(3);  md->srcRaw=CM(STK_AIL);  md->weight=-100;
+		md=setDest(4);  md->srcRaw=CM(STK_RUD);  md->weight= 100;
+			
+		md=setDest(5);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_GEA;
+		md=setDest(6);  md->srcRaw=MIX_MAX; md->weight=100; md->swtch=DSW_ID1;md->mltpx=MLTPX_REP;	
+		md=setDest(6);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_ID2;		
     }
-
+	
 
     //Heli Setup
     if(idx==j++)
@@ -228,6 +268,13 @@ void applyTemplate(uint8_t idx)
     //Gyro Gain
     if(idx==j++)
     {
+		 clearMixes();		
+			md=setDest(1);	 md->srcRaw=CM(STK_THR);  md->weight=100;
+			md=setDest(2);	 md->srcRaw=CM(STK_AIL);  md->weight=100;    
+			md=setDest(3);   md->srcRaw=CM(STK_ELE);  md->weight=100;
+			md=setDest(4);	md->srcRaw=CM(STK_RUD);  md->weight=100;
+			md=setDest(5);  md->srcRaw=MIX_FULL; md->weight=100; md->swtch=DSW_GEA;
+	
         md=setDest(6);  md->srcRaw=STK_P2; md->weight= 50; md->swtch=-DSW_GEA; md->sOffset=100;
         md=setDest(6);  md->srcRaw=STK_P2; md->weight=-50; md->swtch= DSW_GEA; md->sOffset=100;
     }

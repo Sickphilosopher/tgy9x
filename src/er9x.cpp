@@ -65,7 +65,7 @@ const prog_char APM modi12x3[]=
 // Now indexed using modn2x3 from below
 
 const prog_uint8_t APM modn12x3[]= {
-    1, 2, 3, 4,
+	1, 2, 3, 4,
     1, 3, 2, 4,
     4, 2, 3, 1,
     4, 3, 2, 1 };
@@ -101,7 +101,7 @@ void putsTime(uint8_t x,uint8_t y,int16_t tme,uint8_t att,uint8_t att2)
 void putsVolts(uint8_t x,uint8_t y, uint8_t volts, uint8_t att)
 {
     lcd_outdezAtt(x, y, volts, att|PREC1);
-    if(!(att&NO_UNIT)) lcd_putcAtt(lcd_lastPos, y, 'v', att);
+    if(!(att&NO_UNIT)) lcd_putcAtt(lcd_lastPos, y, 'V', att);
 }
 void putsVBat(uint8_t x,uint8_t y,uint8_t att)
 {
@@ -252,7 +252,7 @@ void putsTelemValue(uint8_t x, uint8_t y, uint8_t val, uint8_t channel, uint8_t 
     if ( (g_model.frsky.channels[channel].type == 0/*v*/) || (g_model.frsky.channels[channel].type == 2/*v*/) )
     {
         lcd_outdezNAtt(x, y, value, att|PREC1, 5) ;
-        if(!(att&NO_UNIT)) lcd_putcAtt(lcd_lastPos, y, 'v', att);
+        if(!(att&NO_UNIT)) lcd_putcAtt(lcd_lastPos, y, 'V', att);
     }
     else
     {
@@ -518,7 +518,6 @@ void checkMem()
     {
         alert(PSTR("EEPROM low mem"));
     }
-
 }
 
 void alertMessages( const prog_char * s, const prog_char * t )
@@ -756,31 +755,42 @@ uint8_t checkTrim(uint8_t event)
 {
     int8_t  k = (event & EVT_KEY_MASK) - TRM_BASE;
     int8_t  s = g_model.trimInc;
-    if (s>1) s = 1 << (s-1);  // 1=>1  2=>2  3=>4  4=>8
+	static uint16_t tm_count;
+	
+    if (s>1) 
+		s = 1 << (s-1);  // 1=>1  2=>2  3=>4  4=>8
+
+		
 
     if((k>=0) && (k<8))// && (event & _MSK_KEY_REPT))
     {
         //LH_DWN LH_UP LV_DWN LV_UP RV_DWN RV_UP RH_DWN RH_UP
         uint8_t idx = k/2;
         int8_t tm = *TrimPtr[idx] ;
-        int8_t  v = (s==0) ? (abs(tm)/4)+1 : s;
+       // int8_t  v = (s==0) ? (abs(tm)/4)+1 : s;   ***
+	   int8_t  v = 1;		//*** more small step change in trim
         bool thrChan = ((2-(g_eeGeneral.stickMode&1)) == idx);
         bool thro = (thrChan && (g_model.thrTrim));
-        if(thro) v = 4; // if throttle trim and trim trottle then step=4
+        if(thro) v = 1; // if throttle trim and trim trottle then step=4
         if(thrChan && g_eeGeneral.throttleReversed) v = -v;  // throttle reversed = trim reversed
         int16_t x = (k&1) ? tm + v : tm - v;   // positive = k&1
 
         if(((x==0)  ||  ((x>=0) != (tm>=0))) && (!thro) && (tm!=0)){
             *TrimPtr[idx]=0;
             killEvents(event);
-            audioDefevent(AU_TRIM_MIDDLE);
-
+           // audioDefevent(AU_TRIM_MIDDLE);
+			 audioDefevent(AU_TX_BATTERY_LOW);		// different sound in middle  6 sep 2012
+			
         } else if(x>-125 && x<125){
             *TrimPtr[idx] = (int8_t)x;
             STORE_MODELVARS_TRIM;
             //if(event & _MSK_KEY_REPT) warble = true;
             if(x <= 125 && x >= -125){
-                audio.event(AU_TRIM_MOVE,(abs(x)/4)+60);
+				tm_count++;
+				if(tm_count>=2){
+					audio.event(AU_TRIM_MOVE,(abs(x)/4)+60);	
+					tm_count=0;
+				}			
             }
         }
         else
@@ -788,7 +798,9 @@ uint8_t checkTrim(uint8_t event)
             *TrimPtr[idx] = (x>0) ? 125 : -125;
             STORE_MODELVARS_TRIM;
             if(x <= 125 && x >= -125){
-                audio.event(AU_TRIM_MOVE,(-abs(x)/4)+60);
+				audio.event(AU_TRIM_MOVE,(-abs(x)/4)+60);	
+						
+							
             }
         }
 
@@ -985,6 +997,7 @@ void doBackLight(uint8_t evt)
 void perMain()
 {
     static uint16_t lastTMR;
+
     tick10ms = (get_tmr10ms() != lastTMR);
     lastTMR = get_tmr10ms();
     //    uint16_t time10ms ;
@@ -1009,7 +1022,9 @@ void perMain()
 
     lcd_clear();
     uint8_t evt=getEvent();
-    evt = checkTrim(evt);
+	
+	evt = checkTrim(evt);
+	
 
     doBackLight(evt);
 
@@ -1111,7 +1126,8 @@ uint16_t anaIn(uint8_t chan)
 {
     //                     ana-in:   3 1 2 0 4 5 6 7
     //static prog_char APM crossAna[]={4,2,3,1,5,6,7,0}; // wenn schon Tabelle, dann muss sich auch lohnen
-    const static prog_char APM crossAna[]={3,1,2,0,4,5,6,7};
+    const static prog_char APM crossAna[]={3,1,2,0,4,5,6,7};  
+//	const static prog_char APM crossAna[]={2,1,0,3,4,5,6,7};   // array position = rx ch position, 3=ch4, 0=ch1
     volatile uint16_t *p = &s_anaFilt[pgm_read_byte(crossAna+chan)];
     //  AutoLock autoLock;
     return  *p;
@@ -1288,10 +1304,6 @@ ISR(TIMER0_COMP_vect, ISR_NOBLOCK) //10ms timer
 ISR(TIMER3_CAPT_vect, ISR_NOBLOCK) //capture ppm in 16MHz / 8 = 2MHz
 {
 
-
-
-
-
     uint16_t capture=ICR3;
     cli();
     ETIMSK &= ~(1<<TICIE3); //stop reentrance
@@ -1346,7 +1358,7 @@ int main(void)
 
     DDRA = 0xff;  PORTA = 0x00;
     DDRB = 0x81;  PORTB = 0x7e; //pullups keys+nc
-    DDRC = 0x3e;  PORTC = 0xc1; //pullups nc
+    DDRC = 0x3e;  PORTC = 0xc1; //pullups nc      
     DDRD = 0x00;  PORTD = 0xff; //all D inputs pullups keys
     DDRE = 0x08;  PORTE = 0xff-(1<<OUT_E_BUZZER); //pullups + buzzer 0
     DDRF = 0x00;  PORTF = 0x00; //all F inputs anain - pullups are off

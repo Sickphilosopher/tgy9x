@@ -43,14 +43,14 @@
 #include <inttypes.h>
 
 
-#define STK_RUD  1
-#define STK_ELE  2
-#define STK_THR  3
-#define STK_AIL  4
+#define STK_RUD  1   //1
+#define STK_ELE  2	 //2
+#define STK_THR  3   //3
+#define STK_AIL  4   //4
 #define STK_P1   5
 #define STK_P2   6
 #define STK_P3   7
-#define NUM_TEMPLATES    8  // DIM(n_Templates)
+#define NUM_TEMPLATES    7  // DIM(n_Templates)  change from 8 to 7 6 sep 2012
 #define NUM_TEMPLATE_MIX 8
 #define TEMPLATE_NLEN    15
 
@@ -72,7 +72,7 @@ extern const prog_char *const n_Templates[] ;
 
 void clearMixes();
 void clearCurves();
-void applyTemplate(uint8_t idx);
+void applyTemplate(uint8_t idx, uint8_t stick);
 
 
 #endif //TEMPLATES_H

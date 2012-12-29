@@ -125,14 +125,15 @@ void Key::input(bool val, EnumKeys enuk)
   }
   switch(m_state){
     case KSTATE_OFF:
-      if(m_vals==FFVAL){ //gerade eben sprung auf ff
-        m_state = KSTATE_START;
+		
+      if(m_vals==FFVAL){ //gerade eben sprung auf ff     		
+		m_state = KSTATE_START;
         if(m_cnt>16) m_dblcnt=0; //pause zu lang fuer double
         m_cnt   = 0;
       }
       break;
       //fallthrough
-    case KSTATE_START:
+    case KSTATE_START:	//first press  ( long press not in )	 
       putEvent(EVT_KEY_FIRST(enuk));
       m_dblcnt++;
 #ifdef KSTATE_RPTDELAY
@@ -144,7 +145,8 @@ void Key::input(bool val, EnumKeys enuk)
       break;
 #ifdef KSTATE_RPTDELAY
     case KSTATE_RPTDELAY: // gruvin: longer delay before first key repeat
-      if(m_cnt == 32) putEvent(EVT_KEY_LONG(enuk)); // need to catch this inside RPTDELAY time
+      
+	  if(m_cnt == 32) putEvent(EVT_KEY_LONG(enuk)); // need to catch this inside RPTDELAY time
       if (m_cnt == 40) {
         m_state = 16;
         m_cnt = 0;

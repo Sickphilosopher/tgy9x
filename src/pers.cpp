@@ -43,13 +43,16 @@ void generalDefault()
   g_eeGeneral.currModel=  0;
   g_eeGeneral.contrast = 25;
   g_eeGeneral.vBatWarn = 90;
-  g_eeGeneral.stickMode=  1;
+  g_eeGeneral.stickMode=  1;  //1 =mode 2
+  g_eeGeneral.disablePotScroll=1;//***
+  g_eeGeneral.beeperVal=2;//***
+  g_eeGeneral.lightAutoOff=1;//***
   for (uint8_t i = 0; i < 7; ++i) {
     g_eeGeneral.calibMid[i]     = 0x200;
     g_eeGeneral.calibSpanNeg[i] = 0x180;
     g_eeGeneral.calibSpanPos[i] = 0x180;
   }
-  strncpy_P(g_eeGeneral.ownerName,PSTR("ME        "),10);
+  strncpy_P(g_eeGeneral.ownerName,PSTR("        "),10);
   int16_t sum=0;
   for(uint8_t i=0; i<12;i++) sum+=g_eeGeneral.calibMid[i];
   g_eeGeneral.chkSum = sum;
@@ -85,7 +88,7 @@ void modelDefault(uint8_t id)
   g_model.name[6]='0'+(id+1)%10;
 //  g_model.mdVers = MDVERS;
 
-  applyTemplate(0); //default 4 channel template
+  applyTemplate(0, g_eeGeneral.stickMode); //default 4 channel template
 }
 
 void eeLoadModelName(uint8_t id,char*buf,uint8_t len)
