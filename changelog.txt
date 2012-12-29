@@ -1,0 +1,296 @@
+====================================================================================
+ER9x changelog
+Please insert a short description of a change by inserting it below this header and 
+above the previous change.
+
+Format is as follows:
+******************************************
+CHANGELOG: 25-APR-2011
+description here
+====================================================================================
+
+******************************************
+CHANGELOG: 19-APR-2012  MPB
+Fix splash marker, changes towards custom telemetry screen, GPS speed in mph
+option (imperial units), switch inputs screen now L-R, flash saving
+
+******************************************
+CHANGELOG: 16-APR-2012  MPB
+RPM blades, set limit bug fix, Telemetry capacity alarm, flash saving
+
+******************************************
+CHANGELOG: 15-APR-2012  MPB
+Add second trigger option to timer1
+
+******************************************
+CHANGELOG: 14-APR-2012  MPB
+Fix signed/unsigned comp. add const(s) to allow gcc-avr 4.7.0 to work
+
+******************************************
+CHANGELOG: 12-APR-2012  MPB
+Fix PPM/PPM16 pulse generation, add max Gps Alt, minor code slim
+
+******************************************
+CHANGELOG: 02-APR-2012  MPB
+Yet another fix to GPS altitude
+
+******************************************
+CHANGELOG: 02-APR-2012  MPB
+Further fix to GPS altitude
+
+******************************************
+CHANGELOG: 02-APR-2012  MPB
+Long-down back, reset watchdog on EEPROM timeout
+
+******************************************
+CHANGELOG: 02-APR-2012  MPB
+Remove long-down option to get to telemetry screens - can cause reboot
+
+******************************************
+CHANGELOG: 01-APR-2012  MPB
+move onoffmenuitem() outside FRSKY conditional compile
+
+******************************************
+CHANGELOG: 01-APR-2012  MPB
+Add optional PPMSIM protocol, Fix Safety switch menu bug, Allow GPS altitude 
+on normal altitude screen with alarm and imperial conversion, fix time in 
+stamp.h (makefile), slim the code a bit.
+
+******************************************
+CHANGELOG: 03-MAR-2012  MPB
+Fix compile error when compiling non-FRSKY version
+
+******************************************
+CHANGELOG: 02-MAR-2012  MPB
+Fuel bar display, Telemetry screen access easier
++ V2 changes
+
+******************************************
+CHANGELOG: 28-FEB-2012  ER
+Changed "MAX" to "HALF" to clarify this for newcomers
+Fix lockup issue when moving from PXX with rxnum>32 to PPM.
+
+******************************************
+CHANGELOG: 25-FEB-2012  MPB+ER
+Space saving c.230 bytes flash, and another 222 also saved
+Add confirmation screen to delete mix 
+
+******************************************
+CHANGELOG: 22-FEB-2012  MPB
+PXX - fix infinite loop in putPcmByte
++ V2 changes
+
+******************************************
+CHANGELOG: 22-FEB-2012  MPB
+PXX - change to MSB send first and data scaling + V2 changes
+
+******************************************
+CHANGELOG: 11-FEB-2012  ER
+PXX work - change to not stuff the head and tail bytes.
+
+******************************************
+CHANGELOG: 07-FEB-2012  RFT
+Audio update to save space. 324 bytes saved
+
+******************************************
+CHANGELOG: 06-FEB-2012  MPB
+Fix bug in myeeprom.h - frskyVoltThreshold wrong size
+
+******************************************
+CHANGELOG: 04-FEB-2012  MPB
+Flash and RAM saving
+Add GPS speed display, with max speed
+Add individual cell voltages from FrSky hub 2.0
+Text now allows embedded move to X position characters
+
+******************************************
+CHANGELOG: 02-FEB-2012  RFT
+Few minor audio updates
+
+******************************************
+CHANGELOG: 02-01-2012  RFT
+complere rework of audio system.
+less firmware space
+less cpu usage
+please all test before active use.
+
+
+******************************************
+CHANGELOG: 1-28-2012  ER
+Light to turn on while booting up.
+On sw warning display the out of position switches.
+
+******************************************
+CHANGELOG: 1-27-2012  ER
+Fix for default sw position menu item.
+
+******************************************
+CHANGELOG: 23-1-2012  RFT
+Some updates to audio queue to prevent sound overruns 
+when playing 'long sounds'
+
+******************************************
+CHANGELOG: 22-1-2012  ER
+Menu changes for protocols
+Enable light on by moving sticks
+More elaborate sw warning
+
+******************************************
+CHANGELOG: 19-1-2012  & 12-1-2012 MPB
+Add PXX and PPM16 protocols
+Add Altitude Alarm
+Various code shrinking
+
+******************************************
+CHANGELOG: 13-1-2012  & 12-1-2012 RFT
+Trainer jack audio conflic fix
+
+******************************************
+CHANGELOG: 12-1-2012 MPB
+FrSky internal alarm, code shrinking
+
+******************************************
+CHANGELOG: 12-1-2012 MPB
+FrSky internal alarm, turn off external alarm
+FrSky telemetry, add FUEL guage to display
+
+******************************************
+CHANGELOG: 12-1-2012  & 10-1-2012 RFT
+Update to sound mapping to play red alarms over orange
+and orange over yellow
+
+******************************************
+CHANGELOG: 12-1-2012  & 12-1-2012 ER
+Allow hiding of owner name on splash screen
+
+******************************************
+CHANGELOG: 09-1-2012  & 10-1-2012 RFT
+FRSky internal alarm scheduleding and sound mapping
+
+******************************************
+CHANGELOG: 8-1-2012  MPB
+Frsky telemetry internal alarm scheduling
+Frsky telemetry GPS Altitude display
+DSM protocol implementation (Pat Mackenzie)
+Fix default owner name and model name settings
+
+******************************************
+CHANGELOG: 7-1-2012 
+Frsky telemetry fix
+
+******************************************
+CHANGELOG: 7-1-2012 
+Added "Splash" marker to help eePe find the splash screen data
+NEMA Changes
+
+******************************************
+CHANGELOG: 22-12-2011 MPB
+Fix A2 on altitude telemetry display bug
+
+******************************************
+CHANGELOG: 1-12-2011 MPB
+Add A2 to altitude telemetry display, improve bandgap A2d reading
+
+******************************************
+CHANGELOG: 01-12-2011 RFT
+Cleaned up menus.cpp in relation to frsky yel/org/red option displays.
+
+******************************************
+CHANGELOG: 22-11-2011 MPB
+Fix WsHowHi metric/imperial bug
+
+******************************************
+CHANGELOG: 22-11-2011 RFT
+Audio option to enable 'just haptic' alerts to work
+Added haptic to frsky alerts menu
+
+******************************************
+CHANGELOG: 21-11-2011 MPB
+Re-arrange FrSky telemetry structures
+Add FrSky battery capacity used function
+Fix DSM2 problems, improve pulse generation interrupt latency
+
+******************************************
+CHANGELOG: 21-11-2011 RFT
+Updated audio.cpp & audio.h to include the fancy frsky alert souunds
+Updated menu.cpp to show menu for fancy sounds
+Updated audio.cpp to fix an issue with sound playback when running the sound interupt function
+
+******************************************
+
+
+******************************************
+CHANGELOG: 19-11-2011 MPB
+Move Frsky 10 mS code into frsky.cpp (from drivers.cpp) 
+Add audioQueue::frskyevent() in audio.cpp
+Make double size decimal point take less space + flash saving
+Add frsky alarm options in system menu, these don't change anything yet
+Add frsky alarm setting to myeeprom.h
+Fix dsm2 reboot problem?
+Initialise bandgap and battery values - faster settling of display voltage
+
+******************************************
+CHANGELOG: 14-11-2011 RFT
+Audio array loop change to save cpu cycle
+
+******************************************
+CHANGELOG: 13-11-2011 MPB
+Audio array loop fix
+
+******************************************
+CHANGELOG: 13-11-2011 MPB
+hline and vline memory protection changes
+
+
+******************************************
+CHANGELOG: 13-11-2011 MPB
+Fix Curve draw bug caused by fixing EXPO graph
+
+
+******************************************
+CHANGELOG: 13-11-2011 MPB
+Fix memory corruption occuring in EXPO graph menu
+
+
+******************************************
+CHANGELOG: 09-11-2011 MPB
+Add Amps option to FrSky telemetry A1 and A2.
+Add zero function to Amps display.
+Clear existing mixes when using simple 4 chan template
+Fix delay problem
+Fix Reversed throttle with throttle trim bug
+Fix getswitch() bug when using !SWn
+Change getswitch() to use previous result when recursing deeply
+
+******************************************
+CHANGELOG: 03-11-2011
+1) update to er9x-builder.sh
+
+
+******************************************
+CHANGELOG: 3-11-2011
+1) Moved pulse generation to pulses.cpp and added header file
+2) Added support for DSM2
+
+
+******************************************
+CHANGELOG: 02-11-2011
+1) adding new script called 'er9x-builder.sh' to root folder.
+   script cleans up the compile process of all the versions
+   and should be easier to extend in the future.
+   all 'compile' output ends up in the buildlog folder
+   and is only shown if the compile failed.
+2) added pulses file and header, added DSM2 support
+
+
+
+******************************************
+CHANGELOG: 1-11-2011
+1) Added changelog file
+2) removed -speaker versions from repo
+3) removed -speaker compile options from the domake script
+
+
+
+
+
